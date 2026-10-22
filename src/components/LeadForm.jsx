@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseConfigError } from '../lib/supabase';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
 export default function LeadForm() {
@@ -39,6 +39,8 @@ export default function LeadForm() {
     setErrorMessage('');
 
     try {
+      if (!supabase) throw new Error(supabaseConfigError);
+
       const payload = {
         full_name: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),

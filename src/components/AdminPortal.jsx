@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseConfigError } from '../lib/supabase';
 import { Download, RefreshCw, KeyRound, Check, AlertCircle } from 'lucide-react';
 
 export default function AdminPortal() {
@@ -8,6 +8,7 @@ export default function AdminPortal() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [fetchError, setFetchError] = useState('');
 
   const validPass = import.meta.env.VITE_ADMIN_PASSCODE || 'Admin2026!';
 
@@ -23,7 +24,10 @@ export default function AdminPortal() {
 
   const fetchLeads = async () => {
     setLoading(true);
+    setFetchError('');
     try {
+      if (!supabase) throw new Error(supabaseConfigError);
+
       const { data, error } = await supabase
         .from('ah_leads')
         .select('*')
@@ -33,6 +37,7 @@ export default function AdminPortal() {
       setLeads(data || []);
     } catch (err) {
       console.error('Error fetching leads:', err);
+      setFetchError(err.message || 'Unable to load leads.');
     } finally {
       setLoading(false);
     }
@@ -116,6 +121,13 @@ export default function AdminPortal() {
           </button>
         </div>
       </div>
+
+      {fetchError && (
+        <div style={{ display: 'flex', gap: '0.5rem', padding: '0.6rem', background: '#fef2f2', border: '1px solid #fee2e2', color: 'var(--brand-danger)', fontSize: '0.75rem', borderRadius: 4 }}>
+          <AlertCircle style={{ width: 16, height: 16, flexShrink: 0 }} />
+          <span>{fetchError}</span>
+        </div>
+      )}
 
       <div className="admin-table-wrapper">
         <table className="admin-table">
