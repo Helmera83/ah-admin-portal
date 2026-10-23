@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseConfigError } from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
 export default function LeadForm() {
@@ -39,25 +39,54 @@ export default function LeadForm() {
     setErrorMessage('');
 
     try {
-      if (!supabase) throw new Error(supabaseConfigError);
+      const cleanEmail = formData.email.trim().toLowerCase();
 
-      const payload = {
-        full_name: formData.fullName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        phone: formData.phone.trim() || null,
-        company_name: formData.companyName.trim() || null,
-        service_need: formData.serviceNeed,
-        monthly_hours: formData.monthlyHours,
-        notes: formData.primaryBottleneck.trim() || null,
-        ...attribution,
-      };
+      // Upsert unified customer record
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .upsert(
+          {
+            full_name: formData.fullName.trim(),
+            email: cleanEmail,
+            phone: formData.phone.trim() || null,
+            source: attribution.utm_source === 'facebook' ? 'facebook_lead_ad' : 'website',
+            metadata: {
+              company_name: formData.companyName.trim() || null,
+              service_need: formData.serviceNeed,
+              monthly_hours: formData.monthlyHours,
+              primary_bottleneck: formData.primaryBottleneck.trim() || null,
+              fbclid: attribution.fbclid,
+              utm_campaign: attribution.utm_campaign,
+              utm_medium: attribution.utm_medium,
+              utm_content: attribution.utm_content,
+              referrer: attribution.referrer,
+            },
+          },
+          { onConflict: 'email' }
+        )
+        .select('id')
+        .single();
 
-      const { error } = await supabase.from('ah_leads').insert([payload]);
-      if (error) throw error;
+      if (customerError) throw customerError;
+
+      // Log event to customer_events
+      await supabase.from('customer_events').insert([
+        {
+          customer_id: customerData?.id,
+          source: attribution.utm_source === 'facebook' ? 'facebook_lead_ad' : 'website',
+          event_name: 'lead_submitted',
+          payload: {
+            service_need: formData.serviceNeed,
+            monthly_hours: formData.monthlyHours,
+            captured_at: new Date().toISOString(),
+          },
+        },
+      ]);
+
       setStatus('success');
     } catch (err) {
       console.error(err);
-      setErrorMessage(err.message || 'Transmission failed. Verify your Supabase connection.');
+      setErrorMessage(err.message || 'Submission failed. Please try again.');
       setStatus('error');
     }
   };
@@ -70,7 +99,7 @@ export default function LeadForm() {
           Dossier Received
         </h3>
         <p style={{ fontSize: '0.8rem', color: 'var(--brand-muted)', maxWidth: 360, margin: '0 auto 1.5rem' }}>
-          Your operational requirements have been securely ingested into Supabase. We will review and follow up within 24 hours.
+          Your operational requirements have been securely logged. We will review and follow up within 24 hours.
         </p>
         <button
           type="button"
@@ -99,14 +128,14 @@ export default function LeadForm() {
       <div className="form-header">
         <div>
           <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-teal)', textTransform: 'uppercase' }}>
-            Direct Ingestion
+            Client Intake
           </span>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--brand-navy)' }}>
             Schedule an Operations Review
           </h2>
         </div>
         <span style={{ fontSize: '0.65rem', border: '1px solid var(--brand-border)', padding: '0.2rem 0.5rem', borderRadius: 4, background: 'var(--brand-paper)' }}>
-          SECURE RLS
+          SECURE
         </span>
       </div>
 

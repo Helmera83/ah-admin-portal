@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { supabase } from './utils/supabase';
 import BrandLogo from './components/BrandLogo';
 import LeadForm from './components/LeadForm';
 import AdminPortal from './components/AdminPortal';
 import { Cpu, ReceiptText, DatabaseZap, CalendarCheck, ShieldCheck, Check, Lock, Globe } from 'lucide-react';
 
 export default function App() {
- const [view, setView] = useState('landing');
+  const [view, setView] = useState('landing'); // 'landing' | 'admin'
+
   const capabilities = [
     {
       icon: Cpu,
@@ -41,16 +41,10 @@ export default function App() {
 
           <div className="nav-actions">
             {view === 'landing' ? (
-              <>
-                <span className="btn-pill" style={{ display: 'none', cursor: 'default' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand-teal)' }}></span>
-                  Q4 Availability
-                </span>
-                <button onClick={() => setView('admin')} className="btn-pill" title="Private Operator Access">
-                  <Lock style={{ width: 12, height: 12 }} />
-                  Admin
-                </button>
-              </>
+              <button onClick={() => setView('admin')} className="btn-pill" title="Private Operator Access">
+                <Lock style={{ width: 12, height: 12 }} />
+                Admin
+              </button>
             ) : (
               <button onClick={() => setView('landing')} className="btn-pill">
                 <Globe style={{ width: 12, height: 12 }} />
