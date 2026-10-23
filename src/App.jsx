@@ -1,12 +1,12 @@
 import { useState } from 'react';
+import { supabase } from './utils/supabase';
 import BrandLogo from './components/BrandLogo';
 import LeadForm from './components/LeadForm';
 import AdminPortal from './components/AdminPortal';
 import { Cpu, ReceiptText, DatabaseZap, CalendarCheck, ShieldCheck, Check, Lock, Globe } from 'lucide-react';
 
 export default function App() {
-  const [view, setView] = useState('landing'); // 'landing' | 'admin'
-
+ const [view, setView] = useState('landing');
   const capabilities = [
     {
       icon: Cpu,

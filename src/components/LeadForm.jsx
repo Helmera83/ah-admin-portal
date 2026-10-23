@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseConfigError } from '../lib/supabase';
+import { supabase, supabaseConfigError } from '../utils/supabase';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
 export default function LeadForm() {

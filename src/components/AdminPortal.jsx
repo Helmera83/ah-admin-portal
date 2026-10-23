@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseConfigError } from '../lib/supabase';
+import { supabase, supabaseConfigError } from '../utils/supabase';
 import { Download, RefreshCw, KeyRound, Check, AlertCircle } from 'lucide-react';
 
 export default function AdminPortal() {
