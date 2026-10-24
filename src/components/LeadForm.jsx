@@ -8,7 +8,7 @@ export default function LeadForm({ onSuccessClose }) {
     email: '',
     phone: '',
     companyName: '',
-    serviceNeed: 'Process Automation & Workflows',
+    serviceNeed: 'Invoicing & Bookkeeping',
     primaryBottleneck: '',
   });
 
@@ -40,7 +40,7 @@ export default function LeadForm({ onSuccessClose }) {
     try {
       const cleanEmail = formData.email.trim().toLowerCase();
 
-      // Upsert into customers table without monthly_hours
+      // Upsert into customers table
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .upsert(
@@ -67,7 +67,7 @@ export default function LeadForm({ onSuccessClose }) {
 
       if (customerError) throw customerError;
 
-      // Insert audit event
+      // Log event in customer_events
       await supabase.from('customer_events').insert([
         {
           customer_id: customerData?.id,
@@ -96,7 +96,7 @@ export default function LeadForm({ onSuccessClose }) {
           Inquiry Received
         </h3>
         <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)', maxWidth: 360, margin: '0 auto 1.5rem' }}>
-          Thank you for reaching out. We will review your request and get back to you within one business day.
+          Thank you for reaching out. We will review your requirements and get back to you within one business day.
         </p>
         <button
           type="button"
@@ -176,17 +176,17 @@ export default function LeadForm({ onSuccessClose }) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Focus Area</label>
+          <label className="form-label">Primary Service Need</label>
           <select
             name="serviceNeed"
             className="form-select"
             value={formData.serviceNeed}
             onChange={handleChange}
           >
-            <option>Process Automation & Workflows</option>
-            <option>Accounts Receivable & Invoicing</option>
-            <option>CRM / Pipeline Cleanup</option>
-            <option>Executive Operational Support</option>
+            <option>Invoicing & Bookkeeping</option>
+            <option>CRM Administration</option>
+            <option>Custom Automations</option>
+            <option>Scheduling & Calendar Management</option>
           </select>
         </div>
 
@@ -198,7 +198,7 @@ export default function LeadForm({ onSuccessClose }) {
             className="form-textarea"
             value={formData.primaryBottleneck}
             onChange={handleChange}
-            placeholder="Tell us about the support or administrative workflows you require..."
+            placeholder="Tell us about your current administrative bottlenecks, tools, or schedule..."
           />
         </div>
 
