@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
-export default function LeadForm() {
+export default function LeadForm({ onSuccessClose }) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     companyName: '',
     serviceNeed: 'Process Automation & Workflows',
-    monthlyHours: '10-20 hrs/mo',
     primaryBottleneck: '',
   });
 
@@ -41,7 +40,7 @@ export default function LeadForm() {
     try {
       const cleanEmail = formData.email.trim().toLowerCase();
 
-      // Upsert unified customer record
+      // Upsert into customers table without monthly_hours
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .upsert(
@@ -53,7 +52,6 @@ export default function LeadForm() {
             metadata: {
               company_name: formData.companyName.trim() || null,
               service_need: formData.serviceNeed,
-              monthly_hours: formData.monthlyHours,
               primary_bottleneck: formData.primaryBottleneck.trim() || null,
               fbclid: attribution.fbclid,
               utm_campaign: attribution.utm_campaign,
@@ -69,7 +67,7 @@ export default function LeadForm() {
 
       if (customerError) throw customerError;
 
-      // Log event to customer_events
+      // Insert audit event
       await supabase.from('customer_events').insert([
         {
           customer_id: customerData?.id,
@@ -77,7 +75,6 @@ export default function LeadForm() {
           event_name: 'lead_submitted',
           payload: {
             service_need: formData.serviceNeed,
-            monthly_hours: formData.monthlyHours,
             captured_at: new Date().toISOString(),
           },
         },
@@ -96,47 +93,33 @@ export default function LeadForm() {
       <div className="paper-card" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
         <CheckCircle2 style={{ width: 44, height: 44, color: 'var(--brand-teal)', margin: '0 auto 1rem' }} />
         <h3 style={{ fontSize: '1.25rem', color: 'var(--brand-navy)', marginBottom: '0.5rem', fontWeight: 700 }}>
-          Dossier Received
+          Inquiry Received
         </h3>
-        <p style={{ fontSize: '0.8rem', color: 'var(--brand-muted)', maxWidth: 360, margin: '0 auto 1.5rem' }}>
-          Your operational requirements have been securely logged. We will review and follow up within 24 hours.
+        <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)', maxWidth: 360, margin: '0 auto 1.5rem' }}>
+          Thank you for reaching out. We will review your request and get back to you within one business day.
         </p>
         <button
           type="button"
-          onClick={() => {
-            setFormData({
-              fullName: '',
-              email: '',
-              phone: '',
-              companyName: '',
-              serviceNeed: 'Process Automation & Workflows',
-              monthlyHours: '10-20 hrs/mo',
-              primaryBottleneck: '',
-            });
-            setStatus('idle');
-          }}
-          className="btn-pill"
+          onClick={onSuccessClose || (() => setStatus('idle'))}
+          className="btn-primary"
         >
-          Submit another inquiry
+          Done
         </button>
       </div>
     );
   }
 
   return (
-    <div className="paper-card">
+    <div className="paper-card" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
       <div className="form-header">
         <div>
           <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-teal)', textTransform: 'uppercase' }}>
-            Client Intake
+            Direct Contact
           </span>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--brand-navy)' }}>
-            Schedule an Operations Review
+            Send Us a Message
           </h2>
         </div>
-        <span style={{ fontSize: '0.65rem', border: '1px solid var(--brand-border)', padding: '0.2rem 0.5rem', borderRadius: 4, background: 'var(--brand-paper)' }}>
-          SECURE
-        </span>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -169,7 +152,7 @@ export default function LeadForm() {
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Phone Number</label>
+            <label className="form-label">Phone</label>
             <input
               type="tel"
               name="phone"
@@ -192,46 +175,30 @@ export default function LeadForm() {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Core Focus</label>
-            <select
-              name="serviceNeed"
-              className="form-select"
-              value={formData.serviceNeed}
-              onChange={handleChange}
-            >
-              <option>Process Automation & Workflows</option>
-              <option>Accounts Receivable & Invoicing</option>
-              <option>CRM / Pipeline Cleanup</option>
-              <option>Executive Operational Support</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Scope</label>
-            <select
-              name="monthlyHours"
-              className="form-select"
-              value={formData.monthlyHours}
-              onChange={handleChange}
-            >
-              <option>Under 10 hrs/mo (Advisory)</option>
-              <option>10-20 hrs/mo (Part-time)</option>
-              <option>20-40 hrs/mo (Partner)</option>
-              <option>Fixed-Scope Project</option>
-            </select>
-          </div>
+        <div className="form-group">
+          <label className="form-label">Focus Area</label>
+          <select
+            name="serviceNeed"
+            className="form-select"
+            value={formData.serviceNeed}
+            onChange={handleChange}
+          >
+            <option>Process Automation & Workflows</option>
+            <option>Accounts Receivable & Invoicing</option>
+            <option>CRM / Pipeline Cleanup</option>
+            <option>Executive Operational Support</option>
+          </select>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Key Challenge or Objective</label>
+          <label className="form-label">How can we assist?</label>
           <textarea
             name="primaryBottleneck"
             rows="3"
             className="form-textarea"
             value={formData.primaryBottleneck}
             onChange={handleChange}
-            placeholder="Describe manual tasks, backlog, or systems requiring cleanup..."
+            placeholder="Tell us about the support or administrative workflows you require..."
           />
         </div>
 
@@ -246,11 +213,11 @@ export default function LeadForm() {
           {status === 'submitting' ? (
             <>
               <Loader2 className="animate-spin" style={{ width: 16, height: 16 }} />
-              Transmitting to Supabase...
+              Submitting...
             </>
           ) : (
             <>
-              Transmit Operational Dossier
+              Submit Inquiry
               <ArrowRight style={{ width: 14, height: 14 }} />
             </>
           )}

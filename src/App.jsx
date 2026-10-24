@@ -2,10 +2,23 @@ import { useState } from 'react';
 import BrandLogo from './components/BrandLogo';
 import LeadForm from './components/LeadForm';
 import AdminPortal from './components/AdminPortal';
-import { Cpu, ReceiptText, DatabaseZap, CalendarCheck, ShieldCheck, Check, Lock, Globe } from 'lucide-react';
+import { 
+  Cpu, 
+  ReceiptText, 
+  DatabaseZap, 
+  CalendarCheck, 
+  ShieldCheck, 
+  Check, 
+  Lock, 
+  Globe, 
+  Mail, 
+  ArrowRight, 
+  X 
+} from 'lucide-react';
 
 export default function App() {
   const [view, setView] = useState('landing'); // 'landing' | 'admin'
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   const capabilities = [
     {
@@ -41,10 +54,16 @@ export default function App() {
 
           <div className="nav-actions">
             {view === 'landing' ? (
-              <button onClick={() => setView('admin')} className="btn-pill" title="Private Operator Access">
-                <Lock style={{ width: 12, height: 12 }} />
-                Admin
-              </button>
+              <>
+                <button onClick={() => setIsContactOpen(true)} className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.75rem' }}>
+                  <Mail style={{ width: 14, height: 14 }} />
+                  Contact Us
+                </button>
+                <button onClick={() => setView('admin')} className="btn-pill" title="Private Operator Access">
+                  <Lock style={{ width: 12, height: 12 }} />
+                  Admin
+                </button>
+              </>
             ) : (
               <button onClick={() => setView('landing')} className="btn-pill">
                 <Globe style={{ width: 12, height: 12 }} />
@@ -60,45 +79,52 @@ export default function App() {
         <AdminPortal />
       ) : (
         <main className="container">
-          <div className="hero-grid">
-            {/* Value Proposition Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand-muted)' }}>
-                <span style={{ color: 'var(--brand-teal)', fontWeight: 800 }}>AUDIT READY</span>
-                <span>— Administrative Clarity</span>
-              </div>
-
-              <h1 style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--brand-navy)', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-                High-caliber back-office execution for growing companies.
-              </h1>
-
-              <p style={{ fontSize: '0.9rem', color: 'var(--brand-muted)', lineHeight: 1.6 }}>
-                Eliminate operational drag. AH Administrative Solutions builds workflow pipelines, resolves billing and CRM discrepancies, and runs day-to-day back-office coordination.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
-                  <span>Documented Standard Operating Procedures (SOPs)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
-                  <span>Direct Meta ad attribution & CRM sync</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
-                  <span>Flexible monthly support retainers</span>
-                </div>
-              </div>
+          {/* Centered Hero Section */}
+          <div style={{ maxWidth: '780px', margin: '4rem auto 3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand-muted)', background: '#fff', border: '1px solid var(--brand-border)', padding: '0.25rem 0.75rem', borderRadius: '4px', marginBottom: '1.25rem' }}>
+              <span style={{ color: 'var(--brand-teal)', fontWeight: 800 }}>AUDIT READY</span>
+              <span>— Administrative & Operational Clarity</span>
             </div>
 
-            {/* Lead Intake Form Column */}
-            <div>
-              <LeadForm />
+            <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--brand-navy)', lineHeight: 1.15, letterSpacing: '-0.02em', marginBottom: '1.25rem' }}>
+              High-caliber back-office execution for growing companies.
+            </h1>
+
+            <p style={{ fontSize: '1.05rem', color: 'var(--brand-muted)', lineHeight: 1.6, maxWidth: '640px', marginBottom: '2rem' }}>
+              Eliminate operational drag. AH Administrative Solutions builds workflow pipelines, resolves billing and CRM discrepancies, and runs day-to-day coordination.
+            </p>
+
+            {/* Simple Contact Button */}
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setIsContactOpen(true)} 
+                className="btn-primary"
+                style={{ padding: '0.85rem 2rem', fontSize: '0.95rem' }}
+              >
+                <Mail style={{ width: 16, height: 16 }} />
+                Get in Touch
+                <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+
+            {/* Trust Badges */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>Documented SOPs</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>Workflow & Database Ingestion</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--brand-navy)' }}>
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>Flexible Retainers</span>
+              </div>
             </div>
           </div>
 
-          {/* Capabilities Section */}
+          {/* Capabilities Grid */}
           <section className="capabilities-grid">
             {capabilities.map((c, i) => {
               const Icon = c.icon;
@@ -116,6 +142,39 @@ export default function App() {
             })}
           </section>
         </main>
+      )}
+
+      {/* Modal Contact Sheet */}
+      {isContactOpen && (
+        <div 
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            backgroundColor: 'rgba(16, 34, 63, 0.45)', 
+            backdropFilter: 'blur(4px)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 100, 
+            padding: '1rem' 
+          }}
+          onClick={() => setIsContactOpen(false)}
+        >
+          <div 
+            style={{ width: '100%', maxWidth: '580px', position: 'relative' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsContactOpen(false)}
+              className="btn-pill"
+              style={{ position: 'absolute', top: '-2.5rem', right: 0, background: '#fff' }}
+            >
+              <X style={{ width: 14, height: 14 }} />
+              Close
+            </button>
+            <LeadForm onSuccessClose={() => setIsContactOpen(false)} />
+          </div>
+        </div>
       )}
 
       {/* Footer */}
