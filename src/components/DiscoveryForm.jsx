@@ -9,11 +9,7 @@ import {
   ReceiptText, 
   DatabaseZap, 
   Cpu, 
-  CalendarCheck,
-  Building2,
-  Sliders,
-  Layers,
-  Clock
+  CalendarCheck 
 } from 'lucide-react';
 
 export default function DiscoveryForm({ onSuccessClose }) {
@@ -29,46 +25,46 @@ export default function DiscoveryForm({ onSuccessClose }) {
     phone: '',
     companyName: '',
     website: '',
-    industry: 'Professional Services / B2B',
-    teamSize: '2-5 team members',
-    annualRevenue: '$250k - $750k',
+    industry: 'Professional Services & Consulting',
+    teamSize: '2 - 5 team members',
+    annualRevenue: '$350k - $750k',
 
-    // Step 2: Primary Focus & Deep-Dive Diagnostics
+    // Step 2: Primary Focus & Diagnostics
     primaryService: 'Invoicing & Bookkeeping',
     secondaryServices: [],
     
-    // Invoicing & Bookkeeping diagnostic
+    // Invoicing & AR
     monthlyInvoiceVolume: '10 - 30 invoices/mo',
     arAgingFriction: 'Delayed client payments (30+ days overdue)',
     accountingPlatform: 'QuickBooks Online',
     
-    // CRM diagnostic
+    // CRM
     crmPlatform: 'HubSpot',
     crmCleanliness: 'Duplicate contacts & missing tags/stages',
-    monthlyNewLeads: '25 - 100 leads/mo',
+    monthlyNewLeads: '20 - 75 leads/mo',
     
-    // Automations diagnostic
+    // Automations
     automationPlatform: 'Zapier / Make',
     dataPipelinePain: 'Manual copy-pasting between forms, emails, and databases',
     
-    // Calendar diagnostic
+    // Calendar
     calendarPlatform: 'Google Calendar + Calendly',
     schedulingBottleneck: 'Double bookings & endless back-and-forth emails',
-    weeklyMeetingsCount: '10 - 25 meetings/week',
+    weeklyMeetingsCount: '12 - 25 meetings/week',
 
-    // Core Pain Point (Open ended)
+    // Qualitative objectives
     primaryObjective: '',
     worstManualProcess: '',
 
     // Step 3: Tech Stack & System Access
-    projectManagementTool: 'Asana / Trello / Monday.com',
+    projectManagementTool: 'Asana',
     communicationChannels: 'Slack & Email',
     documentationStatus: 'Partially documented / Mostly in founders head',
 
-    // Step 4: Engagement Scope & SLA Requirements
-    targetEngagementModel: 'Core Retainer ($1,400/mo - ~20 hrs/mo)',
-    expectedTurnaround: 'Within 24 business hours',
-    targetStartDate: 'Within the next 7-14 days',
+    // Step 4: Engagement Scope & SLA
+    targetEngagementModel: 'Core Retainer ($1,400/mo - ~20 hrs dedicated)',
+    expectedTurnaround: 'Standard (Within 24 business hours)',
+    targetStartDate: 'Within the next 7 - 14 days',
     additionalRequirements: '',
   });
 
@@ -120,7 +116,7 @@ export default function DiscoveryForm({ onSuccessClose }) {
     try {
       const cleanEmail = formData.email.trim().toLowerCase();
 
-      // Upsert into customers table with comprehensive questionnaire payload
+      // 1. Maintain identity in customers table
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .upsert(
@@ -129,66 +125,6 @@ export default function DiscoveryForm({ onSuccessClose }) {
             email: cleanEmail,
             phone: formData.phone.trim() || null,
             source: attribution.utm_source === 'facebook' ? 'facebook_lead_ad' : 'website',
-            metadata: {
-              form_type: 'comprehensive_discovery_audit',
-              company_name: formData.companyName.trim() || null,
-              website: formData.website.trim() || null,
-              industry: formData.industry,
-              team_size: formData.teamSize,
-              annual_revenue: formData.annualRevenue,
-              
-              // Service alignment
-              primary_service: formData.primaryService,
-              secondary_services: formData.secondaryServices,
-              
-              // Deep-dive questionnaire data
-              diagnostics: {
-                invoicing: {
-                  platform: formData.accountingPlatform,
-                  volume: formData.monthlyInvoiceVolume,
-                  friction: formData.arAgingFriction,
-                },
-                crm: {
-                  platform: formData.crmPlatform,
-                  hygiene_issue: formData.crmCleanliness,
-                  lead_flow: formData.monthlyNewLeads,
-                },
-                automations: {
-                  platform: formData.automationPlatform,
-                  data_friction: formData.dataPipelinePain,
-                },
-                calendar: {
-                  platform: formData.calendarPlatform,
-                  friction: formData.schedulingBottleneck,
-                  volume: formData.weeklyMeetingsCount,
-                },
-              },
-
-              // Objectives
-              primary_objective: formData.primaryObjective.trim() || null,
-              worst_manual_process: formData.worstManualProcess.trim() || null,
-
-              // Tech stack & ops
-              tech_stack: {
-                project_management: formData.projectManagementTool,
-                communication: formData.communicationChannels,
-                documentation_status: formData.documentationStatus,
-              },
-
-              // Scope & SLA
-              engagement_model: formData.targetEngagementModel,
-              sla_turnaround: formData.expectedTurnaround,
-              target_start_date: formData.targetStartDate,
-              additional_requirements: formData.additionalRequirements.trim() || null,
-
-              // Ad & Source Attribution
-              fbclid: attribution.fbclid,
-              utm_campaign: attribution.utm_campaign,
-              utm_medium: attribution.utm_medium,
-              utm_content: attribution.utm_content,
-              referrer: attribution.referrer,
-              submitted_at: new Date().toISOString(),
-            },
           },
           { onConflict: 'email' }
         )
@@ -197,7 +133,66 @@ export default function DiscoveryForm({ onSuccessClose }) {
 
       if (customerError) throw customerError;
 
-      // Log event in customer_events
+      // 2. Insert into the dedicated client_discoveries table
+      const { error: discoveryError } = await supabase
+        .from('client_discoveries')
+        .insert([
+          {
+            customer_id: customerData?.id,
+            full_name: formData.fullName.trim(),
+            email: cleanEmail,
+            phone: formData.phone.trim() || null,
+            company_name: formData.companyName.trim() || null,
+            website: formData.website.trim() || null,
+            industry: formData.industry,
+            team_size: formData.teamSize,
+            annual_revenue: formData.annualRevenue,
+
+            // Core pillar selection
+            primary_service: formData.primaryService,
+            secondary_services: formData.secondaryServices,
+
+            // Diagnostics
+            invoicing_volume: formData.monthlyInvoiceVolume,
+            ar_friction: formData.arAgingFriction,
+            accounting_platform: formData.accountingPlatform,
+            crm_platform: formData.crmPlatform,
+            crm_cleanliness: formData.crmCleanliness,
+            monthly_lead_flow: formData.monthlyNewLeads,
+            automation_platform: formData.automationPlatform,
+            data_pipeline_friction: formData.dataPipelinePain,
+            calendar_platform: formData.calendarPlatform,
+            scheduling_friction: formData.schedulingBottleneck,
+            meetings_per_week: formData.weeklyMeetingsCount,
+
+            // Qualitative objectives
+            primary_objective: formData.primaryObjective.trim() || null,
+            worst_manual_process: formData.worstManualProcess.trim() || null,
+
+            // Stack details
+            project_management_tool: formData.projectManagementTool,
+            communication_channel: formData.communicationChannels,
+            documentation_status: formData.documentationStatus,
+
+            // Scope & SLA
+            engagement_model: formData.targetEngagementModel,
+            sla_turnaround: formData.expectedTurnaround,
+            target_start_date: formData.targetStartDate,
+            additional_requirements: formData.additionalRequirements.trim() || null,
+
+            // Marketing attribution
+            source: attribution.utm_source === 'facebook' ? 'facebook_lead_ad' : 'website',
+            fbclid: attribution.fbclid,
+            utm_campaign: attribution.utm_campaign,
+            utm_medium: attribution.utm_medium,
+            utm_content: attribution.utm_content,
+            referrer: attribution.referrer,
+          },
+        ]);
+
+      if (discoveryError) throw discoveryError;
+
+      // 3. Write telemetry event
       await supabase.from('customer_events').insert([
         {
           customer_id: customerData?.id,
@@ -206,8 +201,6 @@ export default function DiscoveryForm({ onSuccessClose }) {
           payload: {
             primary_service: formData.primaryService,
             engagement_model: formData.targetEngagementModel,
-            team_size: formData.teamSize,
-            annual_revenue: formData.annualRevenue,
             captured_at: new Date().toISOString(),
           },
         },
@@ -229,11 +222,11 @@ export default function DiscoveryForm({ onSuccessClose }) {
           Operational Diagnostic Dossier Logged
         </h3>
         <p style={{ fontSize: '0.92rem', color: 'var(--brand-muted)', maxWidth: 480, margin: '0 auto 1.75rem', lineHeight: 1.65 }}>
-          Your operational profile and systems requirements have been compiled into our pipeline. Amanda will analyze your responses and prepare a tailored systems roadmap before our introductory session.
+          Your systems profile and operational requirements have been securely recorded into our database. Amanda will review your responses and reach out to schedule an introductory strategy session.
         </p>
         <button
           type="button"
-          onClick={onSuccessClose || (() => window.location.href = '/')}
+          onClick={onSuccessClose || (() => { window.location.href = '/'; })}
           className="btn-primary"
           style={{ padding: '0.75rem 2rem' }}
         >
@@ -271,7 +264,7 @@ export default function DiscoveryForm({ onSuccessClose }) {
           </span>
         </div>
 
-        {/* Progress Bar & Indicators */}
+        {/* Progress Track */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
           {stepLabels.map((s) => (
             <div key={s.num}>
@@ -296,12 +289,6 @@ export default function DiscoveryForm({ onSuccessClose }) {
         {/* ================= STEP 1: ORGANIZATION & OPERATING BASELINE ================= */}
         {step === 1 && (
           <div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)' }}>
-                Please provide your direct business contact details and legal entity structure.
-              </p>
-            </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Full Name *</label>
@@ -673,12 +660,6 @@ export default function DiscoveryForm({ onSuccessClose }) {
         {/* ================= STEP 3: TECH STACK & SYSTEM ACCESS AUDIT ================= */}
         {step === 3 && (
           <div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)' }}>
-                Detail the platforms your team relies on so we can plan secure operator access and integration mappings.
-              </p>
-            </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Accounting & Billing Platform</label>
@@ -799,12 +780,6 @@ export default function DiscoveryForm({ onSuccessClose }) {
         {/* ================= STEP 4: SCOPE, SLA & TIMELINE ================= */}
         {step === 4 && (
           <div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)' }}>
-                Align on estimated monthly bandwidth, service level expectations, and kick-off target.
-              </p>
-            </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Target Retainer / Engagement Model *</label>
@@ -859,7 +834,7 @@ export default function DiscoveryForm({ onSuccessClose }) {
                 className="form-textarea"
                 value={formData.additionalRequirements}
                 onChange={handleChange}
-                placeholder="Mention password management preferences (1Password/LastPass), non-disclosure agreement (NDA) requirements, or specific billing cycles..."
+                placeholder="Mention password management preferences (1Password/Bitwarden), non-disclosure agreement (NDA) requirements, or specific billing cycles..."
               />
             </div>
 
