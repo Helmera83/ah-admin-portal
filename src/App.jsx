@@ -18,26 +18,31 @@ import {
 
 export default function App() {
   // Read path or query parameter on initial load
-  const [view, setView] = useState(() => {
-    const path = window.location.pathname;
+ const [view, setView] = useState(() => {
+    const path = window.location.pathname.toLowerCase();
     const params = new URLSearchParams(window.location.search);
     if (path.includes('intake') || params.get('view') === 'intake') return 'intake';
     if (path.includes('admin') || params.get('view') === 'admin') return 'admin';
     return 'landing';
   });
-
-  const navigateTo = (newView) => {
+const navigateTo = (newView) => {
     setView(newView);
-    const search = window.location.search; // preserves fbclid/utm parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    
     if (newView === 'intake') {
-      window.history.pushState({}, '', `/intake${search}`);
+      searchParams.set('view', 'intake');
+      window.history.pushState({}, '', `?${searchParams.toString()}`);
     } else if (newView === 'admin') {
-      window.history.pushState({}, '', `/admin${search}`);
+      searchParams.set('view', 'admin');
+      window.history.pushState({}, '', `?${searchParams.toString()}`);
     } else {
-      window.history.pushState({}, '', `/${search}`);
+      searchParams.delete('view');
+      const queryString = searchParams.toString();
+      window.history.pushState({}, '', queryString ? `?${queryString}` : '/');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
 
   useEffect(() => {
     const handlePopState = () => {
