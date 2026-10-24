@@ -1,5 +1,5 @@
 import BrandLogo from '../components/BrandLogo';
-import LeadForm from '../components/LeadForm';
+import DiscoveryForm from '../components/DiscoveryForm';
 import { ArrowLeft, ShieldCheck, Check } from 'lucide-react';
 
 export default function IntakePage({ onBack }) {
@@ -20,7 +20,7 @@ export default function IntakePage({ onBack }) {
         </div>
       </header>
 
-      {/* Main Form Page Container */}
+      {/* Main Intake Page Container */}
       <main className="container" style={{ padding: '3.5rem 1.5rem', maxWidth: '880px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div className="badge-pill" style={{ margin: '0 auto 0.85rem' }}>
@@ -28,16 +28,16 @@ export default function IntakePage({ onBack }) {
             <span>— Operational Needs Assessment</span>
           </div>
           <h1 style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--brand-navy)', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
-            Schedule an Operations Review
+            Operational Discovery &amp; Systems Audit
           </h1>
           <p style={{ fontSize: '0.95rem', color: 'var(--brand-muted)', maxWidth: 580, margin: '0 auto', lineHeight: 1.6 }}>
-            Tell us about your administrative bottlenecks, systems, and support requirements. We review every submission within one business day.
+            Please complete this diagnostic questionnaire so we can evaluate your workflow bottlenecks, tech stack requirements, and retainer bandwidth.
           </p>
         </div>
 
-        {/* The Intake Form */}
-        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <LeadForm />
+        {/* Embedded In-Depth Discovery Questionnaire */}
+        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+          <DiscoveryForm onSuccessClose={onBack} />
         </div>
 
         {/* Trust Guarantees */}
@@ -48,7 +48,7 @@ export default function IntakePage({ onBack }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.8rem', color: 'var(--brand-navy)', fontWeight: 600 }}>
             <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
-            <span>Documented SOPs & Clear Scoping</span>
+            <span>Documented SOPs &amp; Clear Scoping</span>
           </div>
         </div>
       </main>
