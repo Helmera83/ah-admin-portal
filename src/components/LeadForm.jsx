@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
-export default function LeadForm({ onSuccessClose }) {
+export default function LeadForm() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -90,36 +90,49 @@ export default function LeadForm({ onSuccessClose }) {
 
   if (status === 'success') {
     return (
-      <div className="paper-card" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-        <CheckCircle2 style={{ width: 44, height: 44, color: 'var(--brand-teal)', margin: '0 auto 1rem' }} />
-        <h3 style={{ fontSize: '1.25rem', color: 'var(--brand-navy)', marginBottom: '0.5rem', fontWeight: 700 }}>
-          Inquiry Received
+      <div className="paper-card" style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
+        <CheckCircle2 style={{ width: 48, height: 48, color: 'var(--brand-teal)', margin: '0 auto 1.25rem' }} />
+        <h3 style={{ fontSize: '1.4rem', color: 'var(--brand-navy)', marginBottom: '0.65rem', fontWeight: 800 }}>
+          Dossier Received
         </h3>
-        <p style={{ fontSize: '0.85rem', color: 'var(--brand-muted)', maxWidth: 360, margin: '0 auto 1.5rem' }}>
-          Thank you for reaching out. We will review your requirements and get back to you within one business day.
+        <p style={{ fontSize: '0.9rem', color: 'var(--brand-muted)', maxWidth: 420, margin: '0 auto 1.75rem', lineHeight: 1.6 }}>
+          Thank you for reaching out. Your operational requirements have been securely recorded. Amanda will review your details and respond within one business day.
         </p>
         <button
           type="button"
-          onClick={onSuccessClose || (() => setStatus('idle'))}
-          className="btn-primary"
+          onClick={() => {
+            setFormData({
+              fullName: '',
+              email: '',
+              phone: '',
+              companyName: '',
+              serviceNeed: 'Invoicing & Bookkeeping',
+              primaryBottleneck: '',
+            });
+            setStatus('idle');
+          }}
+          className="btn-pill"
         >
-          Done
+          Submit another inquiry
         </button>
       </div>
     );
   }
 
   return (
-    <div className="paper-card" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="paper-card">
       <div className="form-header">
         <div>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-teal)', textTransform: 'uppercase' }}>
-            Direct Contact
+          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand-teal)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Direct Contact Form
           </span>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--brand-navy)' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 850, color: 'var(--brand-navy)', marginTop: '0.2rem' }}>
             Send Us a Message
           </h2>
         </div>
+        <span style={{ fontSize: '0.68rem', fontWeight: 700, border: '1px solid var(--brand-border)', padding: '0.25rem 0.6rem', borderRadius: 4, background: 'var(--brand-paper)', color: 'var(--brand-muted)' }}>
+          SECURE RLS
+        </span>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -194,7 +207,7 @@ export default function LeadForm({ onSuccessClose }) {
           <label className="form-label">How can we assist?</label>
           <textarea
             name="primaryBottleneck"
-            rows="3"
+            rows="4"
             className="form-textarea"
             value={formData.primaryBottleneck}
             onChange={handleChange}
@@ -203,21 +216,21 @@ export default function LeadForm({ onSuccessClose }) {
         </div>
 
         {status === 'error' && (
-          <div style={{ display: 'flex', gap: '0.5rem', padding: '0.6rem', background: '#fef2f2', border: '1px solid #fee2e2', color: 'var(--brand-danger)', fontSize: '0.75rem', borderRadius: 4, marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', padding: '0.65rem', background: '#fef2f2', border: '1px solid #fee2e2', color: 'var(--brand-danger)', fontSize: '0.78rem', borderRadius: 4, marginBottom: '1.25rem' }}>
             <AlertCircle style={{ width: 16, height: 16, flexShrink: 0 }} />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <button type="submit" disabled={status === 'submitting'} className="btn-primary" style={{ width: '100%', padding: '0.75rem' }}>
+        <button type="submit" disabled={status === 'submitting'} className="btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
           {status === 'submitting' ? (
             <>
               <Loader2 className="animate-spin" style={{ width: 16, height: 16 }} />
-              Submitting...
+              Transmitting to Supabase...
             </>
           ) : (
             <>
-              Submit Inquiry
+              Submit Operational Dossier
               <ArrowRight style={{ width: 14, height: 14 }} />
             </>
           )}

@@ -1,26 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BrandLogo from './components/BrandLogo';
-import LeadForm from './components/LeadForm';
 import AdminPortal from './components/AdminPortal';
-import FallingText from './components/FallingText';
+import IntakePage from './pages/IntakePage';
 import heroImage from './assets/hero-office.jpg';
-import {
-  ReceiptText,
-  DatabaseZap,
-  Cpu,
-  CalendarCheck,
-  ShieldCheck,
-  Check,
-  Lock,
-  Globe,
-  Mail,
-  ArrowRight,
-  X
+import { 
+  ReceiptText, 
+  DatabaseZap, 
+  Cpu, 
+  CalendarCheck, 
+  ShieldCheck, 
+  Check, 
+  Lock, 
+  Globe, 
+  Mail, 
+  ArrowRight
 } from 'lucide-react';
 
 export default function App() {
-  const [view, setView] = useState('landing');
-  const [isContactOpen, setIsContactOpen] = useState(false);
+  // Read path or query parameter on initial load
+  const [view, setView] = useState(() => {
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    if (path.includes('intake') || params.get('view') === 'intake') return 'intake';
+    if (path.includes('admin') || params.get('view') === 'admin') return 'admin';
+    return 'landing';
+  });
+
+  const navigateTo = (newView) => {
+    setView(newView);
+    const search = window.location.search; // preserves fbclid/utm parameters
+    if (newView === 'intake') {
+      window.history.pushState({}, '', `/intake${search}`);
+    } else if (newView === 'admin') {
+      window.history.pushState({}, '', `/admin${search}`);
+    } else {
+      window.history.pushState({}, '', `/${search}`);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path.includes('intake')) setView('intake');
+      else if (path.includes('admin')) setView('admin');
+      else setView('landing');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const capabilities = [
     {
@@ -95,271 +123,199 @@ export default function App() {
     },
   ];
 
+  // Route: Intake Page
+  if (view === 'intake') {
+    return <IntakePage onBack={() => navigateTo('landing')} />;
+  }
+
+  // Route: Admin Console
+  if (view === 'admin') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <header className="app-header">
+          <div className="container header-inner">
+            <button onClick={() => navigateTo('landing')} className="brand-wrapper">
+              <BrandLogo size={36} />
+            </button>
+            <div className="nav-actions">
+              <button onClick={() => navigateTo('landing')} className="btn-pill">
+                <Globe style={{ width: 12, height: 12 }} />
+                Public Site
+              </button>
+            </div>
+          </div>
+        </header>
+        <AdminPortal />
+      </div>
+    );
+  }
+
+  // Route: Main Landing Page
   return (
-    <div className="app-layout">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
       {/* Header */}
       <header className="app-header">
         <div className="container header-inner">
-          <button onClick={() => setView('landing')} className="brand-wrapper" aria-label="Home">
+          <button onClick={() => navigateTo('landing')} className="brand-wrapper">
             <BrandLogo size={36} />
           </button>
 
-          <nav className="nav-actions" aria-label="Main Navigation">
-            {view === 'landing' ? (
-              <>
-                <button onClick={() => setIsContactOpen(true)} className="btn-primary">
-                  <Mail style={{ width: 14, height: 14, flexShrink: 0 }} />
-                  <span>Contact Us</span>
-                </button>
-                <button onClick={() => setView('admin')} className="btn-pill" title="Private Operator Access">
-                  <Lock style={{ width: 12, height: 12, flexShrink: 0 }} />
-                  <span>Admin</span>
-                </button>
-              </>
-            ) : (
-              <button onClick={() => setView('landing')} className="btn-pill">
-                <Globe style={{ width: 12, height: 12, flexShrink: 0 }} />
-                <span>Public Site</span>
-              </button>
-            )}
-          </nav>
+          <div className="nav-actions">
+            <button 
+              onClick={() => navigateTo('intake')} 
+              className="btn-primary" 
+              style={{ padding: '0.45rem 0.9rem', fontSize: '0.75rem' }}
+            >
+              <Mail style={{ width: 14, height: 14 }} />
+              Client Intake
+            </button>
+            <button onClick={() => navigateTo('admin')} className="btn-pill" title="Private Operator Access">
+              <Lock style={{ width: 12, height: 12 }} />
+              Admin
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main View Router */}
-      {view === 'admin' ? (
-        <AdminPortal />
-      ) : (
-        <main className="container">
-          {/* 1. Hero Section */}
-          <section className="hero-split">
-            <div className="hero-copy">
-              <div className="badge-pill">
-                <span className="badge-highlight">Administrative & Operational Clarity</span>
-              </div>
-
-              <h1>
-                Turn Chaotic Administrative Tasks into Seamless Automated Systems
-              </h1>
-
-              <p className="hero-desc">
-                Eliminate manual data entry, streamline client onboarding, and keep your books balanced with structured operational management built to scale.
-              </p>
-
-              <div className="hero-actions">
-                <button onClick={() => setIsContactOpen(true)} className="btn-primary hero-btn">
-                  <Mail style={{ width: 16, height: 16 }} />
-                  <span>Get in Touch</span>
-                  <ArrowRight style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
-
-              <div className="trust-list">
-                <div className="trust-item">
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)', flexShrink: 0 }} />
-                  <span>Invoicing & Bookkeeping Oversight</span>
-                </div>
-                <div className="trust-item">
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)', flexShrink: 0 }} />
-                  <span>CRM Administration & Custom Automations</span>
-                </div>
-                <div className="trust-item">
-                  <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)', flexShrink: 0 }} />
-                  <span>Executive Calendar Management</span>
-                </div>
-              </div>
+      <main className="container">
+        {/* Executive Split Hero */}
+        <div className="hero-split">
+          <div className="hero-copy">
+            <div className="badge-pill">
+              <span className="badge-highlight">AUDIT READY</span>
+              <span>— Administrative & Operational Clarity</span>
             </div>
 
-            <div className="hero-visual-frame">
-              <div className="hero-image-wrapper">
-                <img
-                  src={heroImage}
-                  alt="AH Administrative Solutions Office Entry"
-                  className="hero-image"
-                  loading="eager"
-                />
-                <div className="hero-image-badge">
-                  <span className="status-dot"></span>
-                  <span>Direct Client Operations</span>
-                </div>
-              </div>
-            </div>
-          </section>
+            <h1>High-caliber back-office execution for growing companies.</h1>
 
-          {/* 2. Capabilities Grid */}
-          <section className="capabilities-grid" aria-label="Services and Capabilities">
-            {capabilities.map((c, i) => {
-              const Icon = c.icon;
-              return (
-                <div key={i} className="capability-card">
-                  <Icon style={{ width: 22, height: 22, color: 'var(--brand-teal)', marginBottom: '0.75rem' }} />
-                  <h3 style={{ fontSize: '0.88rem', fontWeight: 750, color: 'var(--brand-navy)', marginBottom: '0.35rem' }}>
-                    {c.title}
-                  </h3>
-                  <p style={{ fontSize: '0.76rem', color: 'var(--brand-muted)', lineHeight: 1.55 }}>
-                    {c.description}
-                  </p>
-                </div>
-              );
-            })}
-          </section>
+            <p className="hero-desc">
+              Eliminate operational drag. AH Administrative Solutions manages your invoicing, maintains CRM accuracy, builds custom automations, and handles executive calendar coordination.
+            </p>
 
-          {/* 3. Pricing Section */}
-          <section className="pricing-section" aria-label="Pricing Packages">
-            <div className="pricing-header">
-              <div className="badge-pill" style={{ margin: '0 auto 1rem' }}>
-                <span className="badge-highlight">TRANSPARENT ENGAGEMENT</span>
-                <span>— No Hidden Overhead</span>
-              </div>
-              <h2 className="pricing-title">Simple, Structured Pricing Models</h2>
-              <p className="pricing-subtitle">
-                Predictable monthly retainers and scoped projects tailored to support high-growth operators.
-              </p>
+            <div className="hero-actions">
+              <button 
+                onClick={() => navigateTo('intake')} 
+                className="btn-primary hero-btn"
+              >
+                <Mail style={{ width: 16, height: 16 }} />
+                Start Intake Form
+                <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
             </div>
 
-            <div className="pricing-grid">
-              {pricingTiers.map((tier, idx) => (
-                <div
-                  key={idx}
-                  className={`pricing-card ${tier.popular ? 'pricing-card-popular' : ''}`}
-                >
-                  {tier.popular && (
-                    <div className="popular-ribbon">
-                      <span>{tier.badge}</span>
-                    </div>
-                  )}
-
-                  <div className="pricing-card-top">
-                    <span className="tier-badge">{tier.badge}</span>
-                    <h3 className="tier-name">{tier.name}</h3>
-                    <p className="tier-desc">{tier.description}</p>
-                    <div className="tier-price-wrapper">
-                      <span className="tier-amount">{tier.price}</span>
-                      <span className="tier-period">/ {tier.period}</span>
-                    </div>
-                  </div>
-
-                  <ul className="tier-features">
-                    {tier.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="tier-feature-item">
-                        <Check style={{ width: 15, height: 15, color: 'var(--brand-teal)', flexShrink: 0, marginTop: '2px' }} />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    onClick={() => setIsContactOpen(true)}
-                    className={tier.popular ? 'btn-primary tier-btn' : 'btn-pill tier-btn'}
-                  >
-                    <span>{tier.cta}</span>
-                    <ArrowRight style={{ width: 14, height: 14, flexShrink: 0 }} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* 4. High-Conversion Bottom CTA Banner with Interactive Falling Heading */}
-          <section className="cta-banner-section" aria-label="Book Discovery Call">
-            <div className="cta-banner-card">
-              <div className="cta-banner-content">
-                <div className="badge-pill cta-badge">
-                  <span className="badge-highlight">READY TO SCALE</span>
-                  <span>— 100% Confidential Operational Audit</span>
-                </div>
-
-                {/* Physics Falling Headline */}
-                <div className="cta-falling-wrap">
-                  <FallingText
-                    text="Stop letting back-office bottlenecks stall your growth."
-                    highlightWords={['bottlenecks', 'growth.']}
-                    highlightClass="cta-accent-word"
-                    trigger="hover"
-                    variant="text"
-                    split="words"
-                    order="random"
-                    theme="dark"
-                    accentColor="#38bdf8"
-                    gravity={1.1}
-                    bounciness={0.3}
-                    scatter={0.6}
-                    stagger={0.025}
-                    restoreDelay={3.5}
-                    draggable={true}
-                    fontSize="clamp(1.5rem, 3.2vw, 2.3rem)"
-                    className="cta-falling-box"
-                  />
-                </div>
-
-                <div className="cta-actions-row">
-                  <button onClick={() => setIsContactOpen(true)} className="btn-primary cta-primary-btn">
-                    <Mail style={{ width: 17, height: 17 }} />
-                    <span>Optimize Your Workflow</span>
-                    <ArrowRight style={{ width: 16, height: 16 }} />
-                  </button>
-                </div>
+            <div className="trust-list">
+              <div className="trust-item">
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>Invoicing & Bookkeeping Oversight</span>
               </div>
-
-              {/* Feature Highlights */}
-              <div className="cta-highlights">
-                <div className="cta-highlight-item">
-                  <div className="cta-highlight-icon">
-                    <Check style={{ width: 14, height: 14, color: 'var(--brand-teal)' }} />
-                  </div>
-                  <div>
-                    <strong>No Lengthy Lock-In</strong>
-                    <span>Flexible monthly retainers and scoped projects</span>
-                  </div>
-                </div>
-
-                <div className="cta-highlight-item">
-                  <div className="cta-highlight-icon">
-                    <Check style={{ width: 14, height: 14, color: 'var(--brand-teal)' }} />
-                  </div>
-                  <div>
-                    <strong>Tailored Tech Stack</strong>
-                    <span>Works with your existing software and spreadsheets</span>
-                  </div>
-                </div>
-
-                <div className="cta-highlight-item">
-                  <div className="cta-highlight-icon">
-                    <Check style={{ width: 14, height: 14, color: 'var(--brand-teal)' }} />
-                  </div>
-                  <div>
-                    <strong>Immediate Bandwidth</strong>
-                    <span>Fast onboarding and turnaround on urgent priorities</span>
-                  </div>
-                </div>
+              <div className="trust-item">
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>CRM Administration & Custom Automations</span>
+              </div>
+              <div className="trust-item">
+                <Check style={{ width: 16, height: 16, color: 'var(--brand-teal)' }} />
+                <span>Executive Calendar Management</span>
               </div>
             </div>
-          </section>
-        </main>
-      )}
+          </div>
 
-      {/* Modal Contact Sheet */}
-      {isContactOpen && (
-        <div className="modal-overlay" onClick={() => setIsContactOpen(false)} role="dialog" aria-modal="true">
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setIsContactOpen(false)} className="btn-pill modal-close-btn" aria-label="Close modal">
-              <X style={{ width: 14, height: 14 }} />
-              <span>Close</span>
-            </button>
-            <div className="modal-content-scroll">
-              <LeadForm onSuccessClose={() => setIsContactOpen(false)} />
+          <div className="hero-visual-frame">
+            <div className="hero-image-wrapper">
+              <img 
+                src={heroImage} 
+                alt="AH Administrative Solutions Office Entry" 
+                className="hero-image"
+              />
+              <div className="hero-image-badge">
+                <span className="status-dot"></span>
+                <span>Direct Client Operations</span>
+              </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Capabilities Grid */}
+        <section className="capabilities-grid">
+          {capabilities.map((c, i) => {
+            const Icon = c.icon;
+            return (
+              <div key={i} className="capability-card">
+                <Icon style={{ width: 20, height: 20, color: 'var(--brand-teal)', marginBottom: '0.75rem' }} />
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 750, color: 'var(--brand-navy)', marginBottom: '0.35rem' }}>
+                  {c.title}
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--brand-muted)', lineHeight: 1.5 }}>
+                  {c.description}
+                </p>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* Pricing Section */}
+        <section className="pricing-section">
+          <div className="pricing-header">
+            <div className="badge-pill" style={{ margin: '0 auto 1rem' }}>
+              <span className="badge-highlight">TRANSPARENT ENGAGEMENT</span>
+              <span>— No Hidden Overhead</span>
+            </div>
+            <h2 className="pricing-title">Simple, Structured Pricing Models</h2>
+            <p className="pricing-subtitle">
+              Predictable monthly retainers and scoped projects tailored to support high-growth operators.
+            </p>
+          </div>
+
+          <div className="pricing-grid">
+            {pricingTiers.map((tier, idx) => (
+              <div 
+                key={idx} 
+                className={`pricing-card ${tier.popular ? 'pricing-card-popular' : ''}`}
+              >
+                {tier.popular && (
+                  <div className="popular-ribbon">
+                    <span>{tier.badge}</span>
+                  </div>
+                )}
+
+                <div className="pricing-card-top">
+                  <span className="tier-badge">{tier.badge}</span>
+                  <h3 className="tier-name">{tier.name}</h3>
+                  <p className="tier-desc">{tier.description}</p>
+                  <div className="tier-price-wrapper">
+                    <span className="tier-amount">{tier.price}</span>
+                    <span className="tier-period">/ {tier.period}</span>
+                  </div>
+                </div>
+
+                <ul className="tier-features">
+                  {tier.features.map((feat, fIdx) => (
+                    <li key={fIdx} className="tier-feature-item">
+                      <Check style={{ width: 15, height: 15, color: 'var(--brand-teal)', flexShrink: 0, marginTop: '2px' }} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={() => navigateTo('intake')}
+                  className={tier.popular ? 'btn-primary tier-btn' : 'btn-pill tier-btn'}
+                >
+                  {tier.cta}
+                  <ArrowRight style={{ width: 14, height: 14 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
       <footer className="app-footer">
         <div className="container footer-inner">
           <p>© {new Date().getFullYear()} AH Administrative Solutions. All rights reserved.</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <ShieldCheck style={{ width: 14, height: 14, color: 'var(--brand-teal)', flexShrink: 0 }} />
-            <span>Supabase Ingestion Active</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <ShieldCheck style={{ width: 14, height: 14, color: 'var(--brand-teal)' }} />
+            <span></span>
           </div>
         </div>
       </footer>
