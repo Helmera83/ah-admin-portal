@@ -1,5 +1,5 @@
-import BrandLogo from '../components/BrandLogo';
-import DiscoveryForm from '../components/DiscoveryForm';
+import BrandLogo from '../component/BrandLogo';
+import DiscoveryForm from '../component/DiscoveryForm';
 import { ArrowLeft, ShieldCheck, Check } from 'lucide-react';
 
 export default function IntakePage({ onBack }) {
